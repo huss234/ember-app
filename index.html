@@ -219,6 +219,18 @@ select.inp{appearance:none;-webkit-appearance:none;padding-right:30px;background
 .dlg h3{margin:0 0 12px;font-size:22px;line-height:28px;font-weight:650}
 .dlg-b{color:var(--on-s-v);font-size:15px;margin-bottom:20px}
 .dlg-a{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px}
+.spill{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px 0 10px;margin-bottom:6px;border-radius:18px;background:var(--sc-high);color:var(--on-s-v);font-size:13px;font-weight:600;flex:none;white-space:nowrap;position:relative;overflow:hidden;transition:background-color 200ms var(--std),color 200ms var(--std)}
+.spill svg.i{width:20px;height:20px}
+.spill.ok svg.i{color:var(--pri)}
+.spill.bad{background:color-mix(in oklch,var(--err) 16%,var(--sc-high));color:var(--err)}
+.spill.busy svg.i,.lead.sync.busy svg.i{animation:spin 1.1s linear infinite}
+@keyframes spin{to{transform:rotate(-360deg)}}
+.lead.sync.bad{background:color-mix(in oklch,var(--err) 18%,var(--sc-high));color:var(--err)}
+.ghf{display:grid;gap:14px}
+.ghf .tf>span.row{display:flex;margin-bottom:0;height:32px}
+.slog{display:flex;flex-direction:column;gap:2px;border-radius:20px;overflow:hidden}
+.slog div{display:flex;gap:12px;padding:10px 16px;background:var(--sc-high);font-size:14px}
+.slog time{color:var(--on-s-v);font-variant-numeric:tabular-nums;flex:none;min-width:96px}
 #snack{position:fixed;left:16px;right:16px;bottom:calc(var(--nav-h) + var(--sb) + 16px);z-index:80;max-width:560px;margin:0 auto;min-height:52px;padding:6px 8px 6px 18px;border-radius:14px;background:var(--inv-s);color:var(--inv-on-s);display:flex;align-items:center;gap:8px;font-size:14px;transform:translateY(24px);opacity:0;pointer-events:none;transition:transform var(--sp-fast-d) var(--sp-fast),opacity 160ms var(--std)}
 #snack span{flex:1}
 #snack .btn.text{color:var(--inv-pri)}
@@ -520,7 +532,7 @@ button.li:active{border-radius:16px}
 <input type="file" id="impFile" accept=".json,application/json,text/plain" hidden>
 <script>
 'use strict';
-const APP={name:'Ember',version:'1.1.3'};
+const APP={name:'Ember',version:'1.2.0'};
 /* ================= utils ================= */
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -578,6 +590,13 @@ restore:'M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7
 run:'M13.49 5.48c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-3.6 13.9l1-4.4 2.1 2v6h2v-7.5l-2.1-2 .6-3c1.3 1.5 3.3 2.5 5.5 2.5v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1l-5.2 2.2v4.7h2v-3.4l1.8-.7-1.6 8.1-4.9-1-.4 2 7 1.4z',
 stop:'M7 6h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z',
 undo:'M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z',
+cloud:'M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z',
+cloudDone:'M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM10 17l-3.5-3.5 1.41-1.41L10 14.17 15.18 9l1.41 1.41L10 17z',
+cloudOff:'M19.35 10.04C18.67 6.59 15.64 4 12 4c-1.48 0-2.85.43-4.01 1.17l1.46 1.46C10.21 6.23 11.08 6 12 6c3.04 0 5.5 2.46 5.5 5.5v.5H19c1.66 0 3 1.34 3 3 0 1.13-.64 2.11-1.56 2.62l1.45 1.45C23.16 18.16 24 16.68 24 15c0-2.64-2.05-4.78-4.65-4.96zM3 5.27l2.75 2.74C2.56 8.15 0 10.77 0 14c0 3.31 2.69 6 6 6h11.73l2 2L21 20.73 4.27 4 3 5.27zM7.73 10l8 8H6c-2.21 0-4-1.79-4-4s1.79-4 4-4h1.73z',
+sync:'M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z',
+phone:'M17 1.01 7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z',
+tablet:'M18.5 0h-14C3.12 0 2 1.12 2 2.5v19C2 22.88 3.12 24 4.5 24h14c1.38 0 2.5-1.12 2.5-2.5v-19C21 1.12 19.88 0 18.5 0zm-7 23c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm7.5-4H4V3h15v16z',
+key:'M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z',
 csv:'M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6zm2-6h8v2H8zm0 3h8v2H8zm0-6h3v2H8z',
 };
 const ic=(n,s=24)=>`<svg class="i" viewBox="0 0 24 24" width="${s}" height="${s}" aria-hidden="true"><path d="${I[n]}"/></svg>`;
@@ -599,7 +618,7 @@ const DEF_RT=[
 {id:'rt-mob',name:'Mobility',warm:0,cool:0,rounds:5,rest:0,roundRest:0,steps:[['yoga',60],['stretch',60]].map(([ex,sec])=>({ex,sec}))},
 ];
 const DEF_SET={name:'',targets:[30,30,30,30,30,30,30],weekGoal:5,weekStart:1,dayRule:'full',freezes:true,theme:'system',palette:'ember',motion:'',sound:true,voice:false,haptics:true,wake:true,ready:5,backupEvery:7,lastBackup:0};
-function freshState(){return{v:1,created:Date.now(),settings:structuredClone(DEF_SET),exercises:structuredClone(DEF_EX),routines:structuredClone(DEF_RT),sessions:[],active:null,seen:{miles:[]}}}
+function freshState(){return{v:1,created:Date.now(),settings:structuredClone(DEF_SET),exercises:structuredClone(DEF_EX),routines:structuredClone(DEF_RT),sessions:[],active:null,seen:{miles:[]},graves:{},gu:0}}
 function normalize(d){
   const f=freshState();
   if(!d||typeof d!=='object')return f;
@@ -607,9 +626,10 @@ function normalize(d){
   o.settings={...f.settings,...(d.settings&&typeof d.settings==='object'?d.settings:{})};
   const t=o.settings.targets;
   if(!Array.isArray(t)||t.length!==7||t.some(x=>!isFinite(x)))o.settings.targets=f.settings.targets;
-  o.exercises=Array.isArray(d.exercises)?d.exercises.filter(e=>e&&e.id&&e.name).map(e=>({cat:'strength',kind:'time',...e,def:+e.def>0?Math.round(+e.def):(DEF_REPS[e.id]||10)})):f.exercises;
-  o.routines=Array.isArray(d.routines)?d.routines.filter(r=>r&&r.id&&Array.isArray(r.steps)).map(r=>({warm:0,cool:0,rounds:1,rest:0,roundRest:0,...r})):f.routines;
-  o.sessions=Array.isArray(d.sessions)?d.sessions.filter(s=>s&&s.id&&isFinite(s.start)).map(s=>({rest:0,...s,items:Array.isArray(s.items)?s.items.filter(i=>i&&i.ex):[],dur:Math.max(0,+s.dur||0)})):[];
+  o.exercises=Array.isArray(d.exercises)?d.exercises.map(nEx).filter(Boolean):f.exercises;
+  o.routines=Array.isArray(d.routines)?d.routines.map(nRt).filter(Boolean):f.routines;
+  o.sessions=Array.isArray(d.sessions)?d.sessions.map(nSess).filter(Boolean):[];
+  o.graves=d.graves&&typeof d.graves==='object'?d.graves:{};o.gu=+d.gu||0;
   o.sessions.sort((a,b)=>a.start-b.start);
   o.seen={miles:[],...(d.seen||{})};
   o.active=d.active&&typeof d.active==='object'?d.active:null;
@@ -626,7 +646,7 @@ const DB={
     return new Promise(res=>{try{const tx=this.db.transaction('kv','readwrite');tx.objectStore('kv').put(v,k);tx.oncomplete=()=>res(true);tx.onerror=tx.onabort=()=>res(false)}catch(e){res(false)}})}
 };
 let saveT=0,dirty=false,saveFail=0,myRev=null;
-function save(now){dirty=true;clearTimeout(saveT);if(now)return flush();saveT=setTimeout(flush,150)}
+function save(now){dirty=true;Sync.touch();clearTimeout(saveT);if(now)return flush();saveT=setTimeout(flush,150)}
 function flush(){if(!dirty||!S)return Promise.resolve();dirty=false;let snap;try{snap=structuredClone(S)}catch(e){snap=JSON.parse(JSON.stringify(S))}
   return DB.set('state',snap).then(ok=>{
     if(ok){saveFail=0;myRev=Date.now()+':'+Math.random().toString(36).slice(2,8);try{localStorage.setItem('ember:rev',myRev)}catch(e){}return}
@@ -752,6 +772,7 @@ const TIPS={
   score:'Consistency weighs recent days most. A missed day lowers it a little; steady days raise it back.',
   freeze:'Every 7 days on target earns a freeze (you can hold 2). A freeze covers one missed day so the streak survives. Planned rest days never break a streak.',
   week:()=>`Weeks in a row where you reached your target on at least ${S.settings.weekGoal} days.`,
+  token:'A fine-grained GitHub token with Contents: read and write on the data repository. It stays on this device.',
   rule:'What counts as a done day for your streak: the full daily target, half of it, or any training at all.',
 };
 /* ---------- morph: patch the DOM in place so state changes animate instead of snapping ---------- */
@@ -953,7 +974,7 @@ VIEWS.today=()=>{
   const rts=S.routines.map(r=>`<button class="rc" data-act="goRt" data-id="${r.id}"><span class="rn">${esc(r.name)}</span><span class="rd">${rtDur(r)} · ${plural(r.steps.length,'exercise')}</span><span class="rp">${ic('play')}</span></button>`).join('');
   const todays=(a.byDay.get(tk)||[]).slice().reverse();
   return `
-  <header class="top"><div><div class="over">${fmtD(now,{weekday:'long',day:'numeric',month:'long'})}</div><h1>${greet()}${st.name?`, ${esc(st.name)}`:''}</h1></div></header>
+  <header class="top"><div><div class="over">${fmtD(now,{weekday:'long',day:'numeric',month:'long'})}</div><h1>${greet()}${st.name?`, ${esc(st.name)}`:''}</h1></div>${syncPill()}</header>
   ${backupBanner()}
   <section class="card hero">
     <div class="ringw" data-act="nav" data-v="progress">${ringSVG(p,236,16,3.4,12)}<div class="ringc"><div class="big num" data-count="${Math.round(m)}">${Math.round(m)}</div><div class="of">${t?`of ${t} min`:'min today'}</div></div></div>
@@ -1030,6 +1051,7 @@ function repsPop(v){const r=$('#sReps');if(!r)return;r.textContent=v;if(!reduced
 function qaSync(){const g=$('#qaGo');if(g)g.lastChild.textContent=`Add ${QA.n}`;const d=$('#qaDef');if(d)d.disabled=QA.n===exById(QA.ex).def;$$('[data-act=qaSet]',QA.L.body).forEach(c=>c.classList.toggle('on',+c.dataset.v===QA.n))}
 function backupBanner(){
   const st=S.settings;if(!st.backupEvery||S.sessions.length<1)return '';
+  if(GH.ready()&&Sync.st&&!Sync.lastError&&Date.now()-Sync.st.lastSyncAt<st.backupEvery*864e5)return '';
   const age=st.lastBackup?Math.floor((Date.now()-st.lastBackup)/864e5):null;
   if(age!==null&&age<st.backupEvery)return '';
   return `<div class="banner">${ic('download')}<span class="sp">${age===null?'No backup yet':`Last backup ${plural(age,'day')} ago`}</span><button class="btn tonal" data-act="bkShare" style="background:var(--sc-lowest);color:var(--on-s)">Back up</button></div>`;
@@ -1229,6 +1251,15 @@ VIEWS.settings=()=>{
   <div class="card" style="padding:16px"><div style="margin-bottom:10px;font-weight:600;font-size:14px">Theme</div>${seg('theme',[['system','Auto'],['light','Light'],['dark','Dark']],st.theme)}
   <div style="margin:18px 0 10px;font-weight:600;font-size:14px">Colour</div><div class="pal">${Object.entries(PALETTES).map(([k,p])=>`<button class="${st.palette===k?'on':''}" data-act="set" data-k="palette" data-v="${k}" aria-label="${p.name}" style="background:oklch(.6 ${(.17*p.c).toFixed(3)} ${p.h})">${ic('check')}</button>`).join('')}</div>
   <div style="margin:18px 0 10px;font-weight:600;font-size:14px">Motion</div>${seg('motion',[['','Full'],['reduced','Reduced']],st.motion==='reduced'?'reduced':'')}</div>
+  <h2 class="sh">Sync</h2>
+  <div class="group">${GH.ready()?(()=>{const v=syncView();return `
+    ${li(syncIcon(v.k),esc(v.long),`<span class="tr">${ic('right')}</span>`,'data-act="syncSheet" id="syncRow"','Last synced '+agoT(Sync.st.lastSyncAt))}
+    ${li(devForm(),'This device',`<span class="tr">${esc(Sync.st.name)}${ic('right')}</span>`,'data-act="devName"')}
+    ${li('restore','Settings from another device',`<span class="tr">${ic('right')}</span>`,'data-act="devPick"')}
+    ${li('sync','Auto sync',swt('ghAuto',GH.cfg.auto))}
+    ${li('key','GitHub',`<span class="tr">${ic('right')}</span>`,'data-act="ghSetup"',esc(GH.cfg.user+'/'+GH.cfg.repo))}`})()
+    :li('cloud','Sync with GitHub',`<span class="tr">${ic('right')}</span>`,'data-act="ghSetup"')}
+  </div>
   <h2 class="sh">Your data</h2>
   <div class="group">
     ${li('share','Back up now',`<span class="tr">${ic('right')}</span>`,'data-act="bkShare"',`Last: ${ago}`)}
@@ -1780,9 +1811,19 @@ const ACT={
     await takeSnap('Before restore');const keep=S.active;S=normalize(s.data);S.active=keep;applyPrefs(S.settings);cachePrefs();closeLayer(snapsSheet.L);commit();snack('Restored');
   },
   erase:async()=>{
-    if(!await confirmD('Erase all data?','Sessions, exercises, routines and settings are wiped. A restore point is kept on this device.','Erase',true))return;
+    if(!await confirmD('Erase all data?',`Sessions, exercises, routines and settings are wiped${GH.ready()?' here and on your synced devices':''}. A restore point is kept on this device.`,'Erase',true))return;
     await takeSnap('Before erase');const pr=S.settings;S=freshState();S.settings.theme=pr.theme;S.settings.palette=pr.palette;S.settings.motion=pr.motion;commit();snack('All data erased');
   },
+  syncTap:()=>{if(syncView().k==='bad')syncSheet();else syncNow()},
+  syncNow:()=>syncNow(),
+  syncSheet:()=>syncSheet(),
+  ghSetup:()=>ghSetup(),
+  ghSave:()=>ghConnect(),
+  ghOff:async()=>{if(!await confirmD('Disconnect GitHub?','Your data stays on this device and on GitHub.','Disconnect'))return;
+    GH.cfg={...GH.cfg,token:''};await Sync.saveCfg();Sync.forget();Sync.lastError=null;Sync.okThisSession=false;await Sync.save();closeLayer(ghSetup.L);renderCur();snack('Disconnected')},
+  devPick:()=>devPick(),
+  devUse:el=>{closeLayer(devPick.L);if(Sync.restoreDevice(el.dataset.id)){Sync.touch();renderCur()}},
+  devName:()=>devName(),
   sOpen:()=>openSession(),
   sMin:()=>closeLayer(Ov.L),
   sFinish:()=>finishSession(false),
@@ -1828,6 +1869,7 @@ document.addEventListener('input',e=>{
 document.addEventListener('change',e=>{
   const t=e.target,k=t.dataset.ch;if(!k)return;
   if(k==='name'){S.settings.name=t.value.trim();commit({render:false});return}
+  if(k==='ghAuto'){GH.cfg.auto=t.checked;Sync.saveCfg();haptic(6);if(t.checked)Sync.touch();return}
   S.settings[k]=t.checked;haptic(6);commit({render:false});
   if(k==='wake'&&!t.checked)Wake.off();
 });
@@ -1842,6 +1884,464 @@ function lineHover(e){
 }
 document.addEventListener('pointerdown',lineHover);document.addEventListener('pointermove',e=>{if(e.buttons||e.pointerType==='mouse')lineHover(e)});
 
+/* ================= sync (GitHub) =================
+   Same design as Engram: a private data repo holds a snapshot (data/…)
+   plus small journal files, one per sync. Each device keeps a shadow, a
+   hash per record GitHub holds, so what to send is just what differs from
+   it. Writes are one atomic GraphQL commit that refuses to land on a head
+   it has not seen. Records: s:<session> x:<exercise> r:<routine>, g (the
+   shared goals) and m (milestones seen). Deletions travel as graves. */
+const GH_DEF={user:'huss234',repo:'ember-data',token:'',branch:'main',auto:true};
+const GOAL_KEYS=['name','targets','weekGoal','weekStart','dayRule','freezes'];
+const DEV_SKIP=['lastBackup',...GOAL_KEYS];
+const SYNC_BULK=1500,JOURNAL_MAX=800000;
+class SyncError extends Error{constructor(kind,msg,x){super(msg);this.kind=kind;Object.assign(this,x||{})}}
+function b64enc(str){const b=new TextEncoder().encode(str);let s='';for(let i=0;i<b.length;i+=0x8000)s+=String.fromCharCode.apply(null,b.subarray(i,i+0x8000));return btoa(s)}
+function stable(v){if(Array.isArray(v))return '['+v.map(stable).join(',')+']';if(v&&typeof v==='object')return '{'+Object.keys(v).sort().filter(k=>v[k]!==undefined).map(k=>JSON.stringify(k)+':'+stable(v[k])).join(',')+'}';return JSON.stringify(v===undefined?null:v)}
+function h53(str){let a=0xdeadbeef,b=0x41c6ce57;for(let i=0;i<str.length;i++){const c=str.charCodeAt(i);a=Math.imul(a^c,2654435761);b=Math.imul(b^c,1597334677)}
+  a=Math.imul(a^(a>>>16),2246822507)^Math.imul(b^(b>>>13),3266489909);b=Math.imul(b^(b>>>16),2246822507)^Math.imul(a^(a>>>13),3266489909);return 4294967296*(2097151&b)+(a>>>0)}
+const recHash=o=>{const c={...o};delete c.u;return h53(stable(c)).toString(36)};
+const goalsRec=()=>{const o={};GOAL_KEYS.forEach(k=>o[k]=S.settings[k]);return o};
+const milesRec=()=>[...new Set(S.seen.miles)].sort();
+function devSettings(){const o={};for(const k in S.settings)if(!DEV_SKIP.includes(k))o[k]=S.settings[k];return o}
+const devForm=()=>Math.min(screen.width,screen.height)>=600?'tablet':'phone';
+const pause=ms=>new Promise(r=>setTimeout(r,ms));
+const fileRank=p=>p==='meta.json'?0:p==='data/graves.json'?1:p==='data/goals.json'||p==='data/miles.json'?2:p==='data/exercises.json'||p==='data/routines.json'?3:p.startsWith('data/sessions/')?4:p.startsWith('journal/')?6:p.startsWith('devices/')?9:10;
+const byRank=(a,b)=>fileRank(a)-fileRank(b)||(a<b?-1:a>b?1:0);
+const agoT=ms=>{if(!ms)return 'never';const d=(Date.now()-ms)/1000;return d<60?'just now':d<3600?Math.floor(d/60)+' min ago':d<86400?Math.floor(d/3600)+' h ago':fmtD(ms,{day:'numeric',month:'short'})};
+
+const GH={
+  api:'https://api.github.com',cfg:{...GH_DEF},head0:null,rate:{remaining:null,limit:null,reset:0},waitUntil:0,
+  ready(){const c=this.cfg;return !!(c.user&&c.repo&&c.token)},
+  key(){const c=this.cfg;return c.user+'/'+c.repo+'#'+(c.branch||'main')},
+  path(rest){const c=this.cfg;return '/repos/'+encodeURIComponent(c.user)+'/'+encodeURIComponent(c.repo)+(rest||'')},
+  msg(st){return st===401?'GitHub did not accept the token':st===403?'The token has no access to this repository':st===404?'Repository not found':st===409?'Both devices wrote at once':'GitHub error '+st},
+  async req(method,path,o={}){
+    if(Date.now()<this.waitUntil)throw new SyncError('rate','GitHub asked for a pause');
+    if(navigator.onLine===false)throw new SyncError('offline','Offline');
+    const h={Accept:o.accept||'application/vnd.github+json',Authorization:'Bearer '+this.cfg.token,'X-GitHub-Api-Version':'2022-11-28'};
+    if(o.etag)h['If-None-Match']=o.etag;
+    const body=o.body==null?undefined:JSON.stringify(o.body);if(body)h['Content-Type']='application/json';
+    let res;try{res=await fetch(this.api+path,{method,headers:h,body,cache:'no-store',keepalive:!!o.keepalive&&(!body||body.length<60000)})}
+    catch(e){throw new SyncError(navigator.onLine===false?'offline':'net','Could not reach GitHub')}
+    const g=k=>res.headers.get(k);
+    if(g('x-ratelimit-remaining')!=null){this.rate.remaining=+g('x-ratelimit-remaining');this.rate.limit=+g('x-ratelimit-limit');this.rate.reset=+g('x-ratelimit-reset')}
+    if(res.status===304)return{status:304,res};
+    if((o.allow||[]).includes(res.status)){let data=null;try{data=await res.json()}catch(e){}return{status:res.status,data,res}}
+    if(res.status===401)throw new SyncError('auth',this.msg(401));
+    if(res.status===403||res.status===429){let m='';try{m=(await res.json()).message||''}catch(e){}const ra=+g('retry-after');
+      if(ra||this.rate.remaining===0||/rate limit|abuse/i.test(m)){this.waitUntil=ra?Date.now()+ra*1000:this.rate.reset?this.rate.reset*1000+1000:Date.now()+60000;throw new SyncError('rate','GitHub asked for a pause')}
+      throw new SyncError('forbidden',this.msg(403))}
+    if(res.status===404)throw new SyncError('notfound',this.msg(404));
+    if(res.status===409)throw new SyncError('conflict',this.msg(409));
+    if(res.status===413)throw new SyncError('big','Too much for one request');
+    if(res.status>=500)throw new SyncError('server','GitHub is having trouble ('+res.status+')');
+    if(!res.ok)throw new SyncError('http',this.msg(res.status));
+    return{status:res.status,data:o.text?await res.text():res.status===204?null:await res.json(),res};
+  },
+  async gql(query,variables,o){
+    const d=(await this.req('POST','/graphql',{body:{query,variables},...(o||{})})).data||{};
+    if(d.errors&&d.errors.length){const t=d.errors[0].type||'',m=d.errors[0].message||'';
+      if(t==='RATE_LIMITED'||/rate limit/i.test(m)){this.waitUntil=this.rate.reset?this.rate.reset*1000+1000:Date.now()+60000;throw new SyncError('rate','GitHub asked for a pause')}
+      if(t==='STALE_DATA'||/expected branch to point to|expectedHeadOid|head.*(moved|changed)/i.test(m))throw new SyncError('conflict',m);
+      if(t==='NOT_FOUND')throw new SyncError('notfound',this.msg(404));
+      if(t==='FORBIDDEN'||/resource not accessible/i.test(m))throw new SyncError('forbidden','The token needs read and write access to contents');
+      if(/too large|payload|body.*size/i.test(m))throw new SyncError('big',m);
+      throw new SyncError('gql',m||'GitHub returned an error')}
+    return d.data;
+  },
+  /* the head commit, asked conditionally so "nothing new" costs nothing */
+  async head(){
+    const k=this.key(),prev=this.head0&&this.head0.repo===k?this.head0:null;
+    const r=await this.req('GET',this.path('/git/ref/heads/'+encodeURIComponent(this.cfg.branch||'main')),{etag:prev&&prev.tag,allow:[404,409]});
+    if(r.status===304&&prev)return{oid:prev.oid};
+    if(r.status===404||r.status===409){const repo=await this.req('GET',this.path(),{allow:[404]});if(repo.status===404)throw new SyncError('notfound',this.msg(404));return{oid:null,empty:true}}
+    const oid=r.data.object.sha,tag=r.res.headers.get('etag');this.head0=tag?{tag,oid,repo:k}:null;return{oid};
+  },
+  async ensureBranch(){
+    await this.req('PUT',this.path('/contents/README.md'),{body:{message:'Start Ember storage',branch:this.cfg.branch||'main',content:b64enc('# '+this.cfg.repo+'\n\nWritten by the Ember app. Please do not edit it by hand.\n')}});
+    this.head0=null;return(await this.head()).oid;
+  },
+  async compare(base,head){const r=await this.req('GET',this.path('/compare/'+base+'...'+head+'?per_page=1'),{allow:[404]});if(r.status===404)return null;const f=r.data.files||[];return{status:r.data.status,files:f,truncated:f.length>=300}},
+  async tree(oid){const r=await this.req('GET',this.path('/git/trees/'+oid+'?recursive=1'));return(r.data.tree||[]).filter(t=>t.type==='blob').map(t=>({path:t.path,size:t.size||0}))},
+  async readFiles(oid,paths,sizes){
+    const out={},c=this.cfg;let i=0;
+    while(i<paths.length){
+      const grp=[];let bytes=0;
+      while(i<paths.length&&grp.length<60&&(bytes<4e6||!grp.length)){grp.push(paths[i]);bytes+=(sizes&&sizes[paths[i]])||20000;i++}
+      const vars={o:c.user,r:c.repo},decl=grp.map((p,k)=>'$e'+k+':String!').join(',');
+      const body=grp.map((p,k)=>{vars['e'+k]=oid+':'+p;return 'f'+k+':object(expression:$e'+k+'){... on Blob{text isTruncated}}'}).join(' ');
+      const rd=((await this.gql('query($o:String!,$r:String!,'+decl+'){repository(owner:$o,name:$r){'+body+'}}',vars))||{}).repository||{};
+      for(let k=0;k<grp.length;k++){const b=rd['f'+k];out[grp[k]]=!b?null:b.isTruncated||b.text==null?await this.raw(grp[k],oid):b.text}
+    }
+    return out;
+  },
+  async raw(p,ref){return(await this.req('GET',this.path('/contents/'+p.split('/').map(encodeURIComponent).join('/')+'?ref='+encodeURIComponent(ref)),{accept:'application/vnd.github.raw+json',text:true})).data},
+  /* one atomic commit; refused if the branch moved since `expected` */
+  async commit(expected,headline,adds,dels,o){
+    const c=this.cfg,fc={};
+    if(adds&&adds.length)fc.additions=adds.map(f=>({path:f.path,contents:b64enc(f.text)}));
+    if(dels&&dels.length)fc.deletions=dels.map(p=>({path:p}));
+    const d=await this.gql('mutation($input:CreateCommitOnBranchInput!){createCommitOnBranch(input:$input){commit{oid}}}',
+      {input:{branch:{repositoryNameWithOwner:c.user+'/'+c.repo,branchName:c.branch||'main'},expectedHeadOid:expected,message:{headline},fileChanges:fc}},o);
+    const cm=d&&d.createCommitOnBranch&&d.createCommitOnBranch.commit;
+    if(!cm||!cm.oid)throw new SyncError('gql','GitHub did not confirm the commit');
+    this.head0=null;return cm.oid;
+  }
+};
+
+/* normalizers for one record, shared with normalize() */
+const nSess=s=>s&&s.id&&isFinite(s.start)?{rest:0,...s,items:Array.isArray(s.items)?s.items.filter(i=>i&&i.ex):[],dur:Math.max(0,+s.dur||0)}:null;
+const nEx=e=>e&&e.id&&e.name?{cat:'strength',kind:'time',...e,def:+e.def>0?Math.round(+e.def):(DEF_REPS[e.id]||10)}:null;
+const nRt=r=>r&&r.id&&Array.isArray(r.steps)?{warm:0,cool:0,rounds:1,rest:0,roundRest:0,...r}:null;
+const KIND={s:{list:()=>S.sessions,set:v=>S.sessions=v,n:nSess},x:{list:()=>S.exercises,set:v=>S.exercises=v,n:nEx},r:{list:()=>S.routines,set:v=>S.routines=v,n:nRt}};
+
+const Sync={
+  st:null,sh:null,busy:false,again:false,current:null,lastError:null,okThisSession:false,waiting:0,shown:false,timers:{},maxCommit:4e6,
+  defaults(){return{v:1,dev:Math.random().toString(36).slice(2,8),name:'',repo:'',lastOid:null,snapshotAt:0,journalCount:0,lastPushAt:0,lastSyncAt:0,lastPullAt:0,restore:false,log:[]}},
+  emptyShadow(){return{v:1,rec:{},g:{},dev:''}},
+  async load(fresh){
+    const[c,st,sh]=await Promise.all([DB.get('gh'),DB.get('sync'),DB.get('shadow')]);
+    GH.cfg={...GH_DEF,...(c||{})};
+    this.st={...this.defaults(),...(st||{})};if(!Array.isArray(this.st.log))this.st.log=[];
+    if(!this.st.name)this.st.name=devForm()==='tablet'?'Tablet':'Phone';
+    if(fresh&&!this.st.lastOid)this.st.restore=true;
+    this.sh=sh&&sh.v===1?{...this.emptyShadow(),...sh}:this.emptyShadow();
+    /* without its shadow this device cannot tell what GitHub has, so it reads everything first */
+    if(!sh||sh.v!==1)this.forget();
+    if(!st)this.saveState();
+    this.recount();
+  },
+  forget(){this.st.lastOid=null;this.st.snapshotAt=0;this.st.journalCount=0;this.sh=this.emptyShadow()},
+  saveCfg(){return DB.set('gh',GH.cfg)},
+  saveState(){return DB.set('sync',this.st)},
+  save(){return Promise.all([DB.set('sync',this.st),DB.set('shadow',this.sh)])},
+  log1(text){this.st.log.unshift({at:Date.now(),text});if(this.st.log.length>40)this.st.log.length=40},
+
+  /* ---------- what this device has that GitHub does not ----------
+     A record that differs from the shadow changed here; it gets a stamp
+     newer than anything GitHub holds for it, so the newest edit wins on
+     every device. A device that has never synced does not stamp: its
+     first read decides first. */
+  diff(stamp=!!this.st.lastOid){
+    const sh=this.sh,d={put:[],g:[],n:0},now=Date.now(),have=new Set();let moved=false;
+    const look=(k,o,getU,setU)=>{have.add(k);const h=recHash(o),p=sh.rec[k];if(p&&p[0]===h)return;
+      const floor=Math.max(p?p[1]:0,S.graves[k]||0,sh.g[k]||0);if(stamp&&!(getU()>floor)){setU(Math.max(now,floor+1));moved=true}
+      d.put.push([k,h,o])};
+    for(const t in KIND)for(const o of KIND[t].list())look(t+':'+o.id,o,()=>o.u||0,v=>o.u=v);
+    const g=goalsRec();look('g',g,()=>S.gu||0,v=>S.gu=v);
+    const gp=d.put.find(x=>x[0]==='g');if(gp)gp[2]={...g,u:S.gu};
+    const m=milesRec(),mh=recHash(m);have.add('m');if(!sh.rec.m||sh.rec.m[0]!==mh)d.put.push(['m',mh,m]);
+    let gone=0;for(const k in sh.rec)if(!have.has(k)&&!(S.graves[k]>=sh.rec[k][1])){if(stamp){S.graves[k]=Math.max(now,sh.rec[k][1]+1);moved=true}else gone++}
+    for(const k in S.graves)if(sh.g[k]!==S.graves[k])d.g.push([k,S.graves[k]]);
+    if(moved){dirty=true;flush()}
+    d.n=d.put.length+d.g.length;d.count=d.n+gone;return d;
+  },
+  devHash(){return recHash(devSettings())+':'+devForm()+':'+this.st.name},
+  settingsWaiting(){return !!(this.st.snapshotAt&&this.devHash()!==this.sh.dev)},
+  devFile(){return{path:'devices/'+this.st.dev+'.json',text:JSON.stringify({v:1,id:this.st.dev,name:this.st.name,form:devForm(),at:Date.now(),app:APP.version,settings:devSettings()})}},
+  recount(){if(!this.st||!GH.ready())return;this.waiting=this.diff(false).count+(this.settingsWaiting()?1:0);paintSync()},
+  /* a change: count it soon, send it once things settle */
+  touch(){if(!this.st||!GH.ready())return;clearTimeout(this.timers.count);this.timers.count=setTimeout(()=>this.recount(),400);this.requestPush(12000)},
+  requestPush(delay){if(!GH.ready()||!GH.cfg.auto)return;clearTimeout(this.timers.push);this.timers.push=setTimeout(()=>this.run({reason:'auto'}),Math.max(delay,20000-(Date.now()-(this.st.lastPushAt||0))))},
+
+  /* ---------- sending ---------- */
+  journalFiles(d,batch){
+    const parts=[];let cur,size;
+    const fresh=()=>{cur={v:1,dev:this.st.dev,batch,at:Date.now()};size=120;parts.push(cur)};
+    const put=(sec,k,v)=>{const add=JSON.stringify(v).length+k.length+8;if(size+add>JOURNAL_MAX&&size>120)fresh();size+=add;(cur[sec]||(cur[sec]={}))[k]=v};
+    fresh();d.g.forEach(x=>put('g',x[0],x[1]));d.put.forEach(x=>put('p',x[0],x[2]));
+    const n=new Date(),base=`journal/${n.getUTCFullYear()}/${pad(n.getUTCMonth()+1)}/${pad(n.getUTCDate())}/${n.getTime()}-${this.st.dev}-${batch}`;
+    return d.n?parts.map((p,i)=>({path:parts.length>1?base+'.p'+i+'.json':base+'.json',text:JSON.stringify(p)})):[];
+  },
+  async push(d,o){
+    if(!this.st.snapshotAt||d.n>SYNC_BULK){
+      if(o.keepalive)return{sent:0};
+      const first=!this.st.snapshotAt;
+      await this.writeSnapshot(first?'Ember data from '+this.st.name:'Sync from '+this.st.name+': '+plural(d.n,'change'));
+      if(first)this.log1('GitHub now holds your training data');
+      return{sent:d.n};
+    }
+    const dh=this.devHash(),batch=Math.random().toString(36).slice(2,10),files=this.journalFiles(d,batch);
+    const adds=dh!==this.sh.dev?files.concat([this.devFile()]):files;
+    if(!adds.length)return{sent:0};
+    const oid=await GH.commit(this.st.lastOid,d.n?'Sync from '+this.st.name+': '+plural(d.n,'change'):'Settings of '+this.st.name,adds,[],{keepalive:o.keepalive});
+    /* GitHub confirmed: now, and only now, the shadow moves */
+    const sh=this.sh;
+    d.put.forEach(x=>sh.rec[x[0]]=[x[1],x[0]==='m'?0:x[0]==='g'?(S.gu||0):(x[2].u||0)]);
+    d.g.forEach(x=>{sh.g[x[0]]=x[1];if(!this.has(x[0]))delete sh.rec[x[0]]});
+    if(!d.n)this.log1('Settings of this device saved');
+    sh.dev=dh;this.st.lastOid=oid;this.st.lastPushAt=Date.now();this.st.journalCount=(this.st.journalCount||0)+files.length;
+    await this.save();return{sent:d.n};
+  },
+  has(k){const t=KIND[k[0]];if(!t||k[1]!==':')return false;const id=k.slice(2);return t.list().some(o=>o.id===id)},
+  /* the whole collection, rewritten: first upload, a very large change, and
+     the weekly tidy-up that folds the journal back in. Only ever written
+     right after a pull, and it removes the journal files it absorbed. */
+  async writeSnapshot(headline){
+    this.shown=true;paintSync();
+    const existing=this.st.lastOid?(await GH.tree(this.st.lastOid)).map(f=>f.path):[];
+    this.diff();
+    const sh=this.emptyShadow(),files=[],at=Date.now(),years={};
+    for(const s of S.sessions){const y=new Date(s.start).getFullYear();(years[y]||(years[y]={}))[s.id]=s;sh.rec['s:'+s.id]=[recHash(s),s.u||0]}
+    for(const y in years)files.push({path:`data/sessions/${y}.json`,text:JSON.stringify(years[y])});
+    const ex={},rt={};
+    for(const e of S.exercises){ex[e.id]=e;sh.rec['x:'+e.id]=[recHash(e),e.u||0]}
+    for(const r of S.routines){rt[r.id]=r;sh.rec['r:'+r.id]=[recHash(r),r.u||0]}
+    files.push({path:'data/exercises.json',text:JSON.stringify(ex)},{path:'data/routines.json',text:JSON.stringify(rt)});
+    const g=goalsRec();files.push({path:'data/goals.json',text:JSON.stringify({...g,u:S.gu||0})});sh.rec.g=[recHash(g),S.gu||0];
+    const m=milesRec();files.push({path:'data/miles.json',text:JSON.stringify(m)});sh.rec.m=[recHash(m),0];
+    files.push({path:'data/graves.json',text:JSON.stringify(S.graves)});sh.g={...S.graves};
+    files.push(this.devFile());sh.dev=this.devHash();
+    const counts={sessions:S.sessions.length,exercises:S.exercises.length,routines:S.routines.length};
+    files.push({path:'meta.json',text:JSON.stringify({format:'ember.sync',version:1,snapshotAt:at,counts,app:APP.version,by:this.st.dev})});
+    const keep=new Set(files.map(f=>f.path));
+    await this.commitFiles(files,headline,existing.filter(p=>(p.startsWith('data/')&&!keep.has(p))||p.startsWith('journal/')));
+    this.sh=sh;this.st.snapshotAt=at;this.st.journalCount=0;this.st.lastPushAt=Date.now();
+    await this.save();
+  },
+  async commitFiles(files,headline,gone){
+    let i=0,n=0;
+    while(i<files.length){
+      const grp=[];let bytes=0;
+      while(i<files.length&&(bytes+files[i].text.length<this.maxCommit||!grp.length)){grp.push(files[i]);bytes+=files[i].text.length;i++}
+      const last=i>=files.length,many=n>0||!last;
+      try{this.st.lastOid=await GH.commit(this.st.lastOid,headline+(many?' ('+(++n)+')':''),grp,last?gone:[]);await this.saveState()}
+      catch(e){if(e.kind==='big'&&this.maxCommit>4e5){this.maxCommit=Math.floor(this.maxCommit/2);i-=grp.length;if(many&&n)n--;continue}throw e}
+    }
+  },
+  async maybeCompact(){
+    const jc=this.st.journalCount||0;
+    if(!this.st.snapshotAt||!jc||(jc<=150&&Date.now()-this.st.snapshotAt<7*864e5))return;
+    if(this.diff().n)return;
+    if((await GH.head()).oid!==this.st.lastOid)return;
+    try{await this.writeSnapshot('Fold '+plural(jc,'journal file')+' into the snapshot')}catch(e){if(e.kind==='conflict')return;throw e}
+    this.log1('Tidied GitHub: '+plural(jc,'small file')+' folded in');
+  },
+
+  /* ---------- receiving ---------- */
+  ctx(){return{n:0,meta:null,devs:[]}},
+  applyRec(k,v,c){
+    if(v==null||typeof v!=='object')return;
+    const sh=this.sh;
+    if(k==='m'){if(!Array.isArray(v))return;sh.rec.m=[recHash([...new Set(v)].sort()),0];const add=v.filter(x=>typeof x==='string'&&!S.seen.miles.includes(x));if(add.length){S.seen.miles.push(...add);c.n++}return}
+    if(k==='g'){
+      const inc={};GOAL_KEYS.forEach(x=>inc[x]=v[x]===undefined?S.settings[x]:v[x]);
+      if(!Array.isArray(inc.targets)||inc.targets.length!==7||inc.targets.some(x=>!isFinite(x)))return;
+      const u=+v.u||0,ih=recHash(inc),cur=goalsRec(),ch=recHash(cur),p=sh.rec.g;sh.rec.g=[ih,u];
+      if(ih===ch)return;
+      const mine=!p||p[0]!==ch;
+      if(!mine||u>(S.gu||0)||(u===(S.gu||0)&&ih>ch)){Object.assign(S.settings,inc);S.gu=u;c.n++}
+      return;
+    }
+    const t=KIND[k[0]];if(!t||k[1]!==':')return;
+    const r=t.n(v);if(!r)return;
+    const u=+r.u||0,ih=recHash(r),p=sh.rec[k];sh.rec[k]=[ih,u];
+    if(S.graves[k]>=u)return;                                 /* deleted here after that edit */
+    const list=t.list(),i=list.findIndex(o=>o.id===r.id);
+    if(i<0){list.push(r);c.n++;return}
+    const cur=list[i],ch=recHash(cur);if(ch===ih)return;
+    const mine=!p||p[0]!==ch,cu=+cur.u||0;
+    if(!mine||u>cu||(u===cu&&ih>ch)){list[i]=r;c.n++}
+  },
+  applyGrave(k,at,c){
+    at=+at;if(!at||k.length<3)return;
+    if(!(this.sh.g[k]>=at))this.sh.g[k]=at;
+    if(!(S.graves[k]>=at))S.graves[k]=at;
+    const t=KIND[k[0]];if(!t)return;
+    const id=k.slice(2),list=t.list(),i=list.findIndex(o=>o.id===id);
+    if(i>=0&&(+list[i].u||0)<=at){list.splice(i,1);delete this.sh.rec[k];c.n++}
+  },
+  applyFile(path,text,c){
+    if(text==null)return;let o;try{o=JSON.parse(text)}catch(e){return}
+    if(!o||typeof o!=='object')return;
+    if(path==='meta.json')c.meta=o;
+    else if(path.startsWith('journal/')){if(o.g)for(const k in o.g)this.applyGrave(k,o.g[k],c);if(o.p)for(const k in o.p)this.applyRec(k,o.p[k],c)}
+    else if(path==='data/graves.json')for(const k in o)this.applyGrave(k,o[k],c);
+    else if(path==='data/goals.json')this.applyRec('g',o,c);
+    else if(path==='data/miles.json')this.applyRec('m',o,c);
+    else if(path==='data/exercises.json')for(const id in o)this.applyRec('x:'+id,o[id],c);
+    else if(path==='data/routines.json')for(const id in o)this.applyRec('r:'+id,o[id],c);
+    else if(path.startsWith('data/sessions/'))for(const id in o)this.applyRec('s:'+id,o[id],c);
+    else if(path.startsWith('devices/'))c.devs.push(o);
+  },
+  async finish(c){
+    if(c.n){S.sessions.sort((a,b)=>a.start-b.start);dirty=true;await flush()}
+    if(c.meta&&c.meta.snapshotAt)this.st.snapshotAt=c.meta.snapshotAt;
+  },
+  async pull(o){
+    const h=await GH.head();
+    if(h.empty)return{empty:true};
+    this.st.lastPullAt=Date.now();
+    if(!o.full&&this.st.lastOid&&h.oid===this.st.lastOid)return{received:0};
+    if(o.full||!this.st.lastOid)return this.fullDownload(h.oid);
+    const cmp=await GH.compare(this.st.lastOid,h.oid);
+    if(!cmp||cmp.truncated||cmp.status==='diverged'||cmp.status==='behind')return this.fullDownload(h.oid);
+    const want=cmp.files.filter(f=>f.status!=='removed').map(f=>f.filename).filter(p=>fileRank(p)<7).sort(byRank),c=this.ctx();
+    if(want.length){const tx=await GH.readFiles(h.oid,want,{});want.forEach(p=>this.applyFile(p,tx[p],c))}
+    const jAdd=want.filter(p=>p.startsWith('journal/')).length,jGone=cmp.files.filter(f=>f.status==='removed'&&f.filename.startsWith('journal/')).length;
+    this.st.journalCount=Math.max(0,(this.st.journalCount||0)+jAdd-jGone);
+    await this.finish(c);this.st.lastOid=h.oid;await this.save();
+    return{received:c.n};
+  },
+  /* first sync, a lost shadow, or a repair: read all of it and merge */
+  async fullDownload(oid){
+    const tree=await GH.tree(oid),sizes={};tree.forEach(f=>sizes[f.path]=f.size);
+    const paths=tree.map(f=>f.path),own='devices/'+this.st.dev+'.json',hasMeta=paths.includes('meta.json');
+    const want=paths.filter(p=>(hasMeta&&fileRank(p)<7)||(p.startsWith('devices/')&&p!==own)).sort(byRank);
+    if(want.length>3){this.shown=true;paintSync()}
+    const tx=want.length?await GH.readFiles(oid,want,sizes):{};
+    this.sh=this.emptyShadow();
+    const c=this.ctx();want.forEach(p=>this.applyFile(p,tx[p],c));
+    await this.finish(c);
+    this.devs=c.devs.filter(r=>r&&r.id&&r.settings);
+    if(this.st.restore){this.st.restore=false;this.restoreDevice()}
+    this.st.lastOid=oid;this.st.journalCount=paths.filter(p=>p.startsWith('journal/')).length;
+    if(!hasMeta)this.st.snapshotAt=0;
+    await this.save();return{received:c.n};
+  },
+  /* a device starting from nothing takes the settings of the last device of its kind */
+  restoreDevice(id){
+    const best=id?(this.devs||[]).find(r=>r.id===id):(this.devs||[]).filter(r=>r.form===devForm()).sort((a,b)=>(b.at||0)-(a.at||0))[0];
+    if(!best)return false;
+    for(const k in best.settings)if(!DEV_SKIP.includes(k)&&k in DEF_SET)S.settings[k]=best.settings[k];
+    applyPrefs(S.settings);cachePrefs();save();
+    const msg='Settings from '+(best.name||'your other '+best.form);this.log1(msg);snack(msg);return true;
+  },
+  async devices(){
+    const h=await GH.head();if(h.empty)return[];
+    const tree=(await GH.tree(h.oid)).filter(f=>f.path.startsWith('devices/')&&f.path!=='devices/'+this.st.dev+'.json').map(f=>f.path);
+    const tx=tree.length?await GH.readFiles(h.oid,tree,{}):{};
+    this.devs=tree.map(p=>{try{return JSON.parse(tx[p])}catch(e){return null}}).filter(r=>r&&r.id&&r.settings);
+    return this.devs;
+  },
+
+  /* ---------- one sync ---------- */
+  run(o={}){
+    if(!GH.ready()||!this.st)return Promise.resolve(null);
+    if(this.busy){if(!o.pullOnly)this.again=true;return this.current||Promise.resolve(null)}
+    this.busy=true;this.lastError=null;this.shown=o.reason==='manual';clearTimeout(this.timers.retry);clearTimeout(this.timers.push);paintSync();
+    const res={sent:0,received:0};
+    this.current=(async()=>{
+      try{
+        if(this.st.repo!==GH.key()){this.forget();this.st.repo=GH.key()}
+        for(let attempt=0;;attempt++){
+          this.diff();                                      /* stamp local edits before anything arrives */
+          const p=await this.pull({});
+          if(p.empty){if(o.pullOnly)break;this.st.lastOid=await GH.ensureBranch();this.st.snapshotAt=0}
+          if(p.received){res.received+=p.received;afterRemote()}
+          if(o.pullOnly)break;
+          const d=this.diff();
+          if(!d.n&&this.st.snapshotAt&&this.devHash()===this.sh.dev)break;
+          try{res.sent+=(await this.push(d,o)).sent;break}
+          catch(e){if(e.kind!=='conflict'||attempt>=4)throw e;await pause(400*2**attempt+Math.random()*300)}
+        }
+        if(!o.pullOnly&&!o.keepalive){try{await this.maybeCompact()}catch(e){console.warn('sync tidy-up',e)}}
+        this.okThisSession=true;this.st.lastSyncAt=Date.now();
+        if(res.sent||res.received)this.log1(`Synced · ${res.sent} sent, ${res.received} received`);
+        await this.saveState();
+      }catch(e){
+        this.lastError=e.kind?e:new SyncError('error',e.message||'Sync failed');res.error=this.lastError;
+        const k=this.lastError.kind;
+        if(k!=='offline'&&k!=='net'){this.log1('Problem: '+this.lastError.message);this.saveState()}
+        const again=k==='rate'?Math.max(5000,GH.waitUntil-Date.now()+1000):k==='conflict'?30000:k==='net'||k==='server'?60000:0;
+        if(again&&GH.cfg.auto)this.timers.retry=setTimeout(()=>this.run({reason:'retry'}),again);
+      }finally{
+        this.busy=false;this.current=null;this.shown=false;this.recount();
+        if(this.again){this.again=false;setTimeout(()=>this.run({reason:'auto'}),500)}
+      }
+      return res;
+    })();
+    return this.current;
+  }
+};
+
+/* something arrived from another device */
+function afterRemote(){ver++;applyPrefs(S.settings);if(!Ov.open)renderCur()}
+
+/* ---- status ---- */
+function syncView(){
+  if(!GH.ready())return{k:'off',short:'Sync off',long:'Not connected'};
+  const e=Sync.lastError,n=Sync.waiting,mins=Math.max(1,Math.ceil((GH.waitUntil-Date.now())/60000));
+  if(Sync.busy&&(Sync.shown||!Sync.okThisSession))return{k:'busy',short:'Syncing',long:'Syncing with GitHub'};
+  if(e&&e.kind==='auth')return{k:'bad',short:'Token problem',long:e.message};
+  if(e&&e.kind==='rate'&&GH.waitUntil>Date.now())return{k:'wait',short:`Wait ${mins} min`,long:`GitHub asked for a pause of ${mins} min`};
+  if(navigator.onLine===false||(e&&(e.kind==='offline'||e.kind==='net')))return{k:'wait',short:n?`Offline · ${n}`:'Offline',long:n?`Offline · ${plural(n,'change')} waiting`:'Offline'};
+  if(e)return{k:'bad',short:'Sync failed',long:e.message||'Sync failed'};
+  if(n)return{k:'wait',short:`${n} waiting`,long:`${plural(n,'change')} not on GitHub yet`};
+  if(!Sync.okThisSession)return{k:'wait',short:'Not synced',long:'Not synced yet'};
+  return{k:'ok',short:'Synced',long:'Everything is on GitHub'};
+}
+const syncIcon=k=>k==='busy'?'sync':k==='bad'||k==='off'?'cloudOff':k==='ok'?'cloudDone':'cloud';
+function syncPill(){if(!GH.ready())return '';const v=syncView();return `<button class="spill ${v.k}" id="syncPill" data-act="syncTap" aria-label="Sync: ${esc(v.long)}">${ic(syncIcon(v.k),20)}<span>${esc(v.short)}</span></button>`}
+function paintSync(){
+  const p=$('#syncPill');
+  if(p){const v=syncView();if(!p.classList.contains(v.k)||p.lastChild.textContent!==v.short){p.className='spill '+v.k;p.firstChild.outerHTML=ic(syncIcon(v.k),20);p.lastChild.textContent=v.short;p.setAttribute('aria-label','Sync: '+v.long)}}
+  if(ui.view==='settings'){const r=$('#syncRow');if(r){const v=syncView();r.querySelector('.t1').textContent=v.long;r.querySelector('.t2').textContent='Last synced '+agoT(Sync.st&&Sync.st.lastSyncAt)}}
+  if(syncSheet.L&&Layers.includes(syncSheet.L))syncSheet.L.refresh();
+}
+
+async function syncNow(){
+  if(!GH.ready()){ghSetup();return}
+  if(navigator.onLine===false){paintSync();snack(Sync.waiting?`Offline · ${plural(Sync.waiting,'change')} will sync later`:'No internet connection');return}
+  const r=await Sync.run({reason:'manual'});if(!r)return;
+  if(r.error){snack(r.error.message||'Sync failed');return}
+  snack(r.sent||r.received?`Synced · ${r.sent} sent, ${r.received} received`:'Synced · already in step');
+}
+
+/* ---- connect sheet ---- */
+function ghSetup(){
+  const c=GH.cfg,on=GH.ready();
+  const L=sheet(()=>`<div class="st">GitHub sync</div>
+    <div class="ghf">
+      <label class="tf"><span>OWNER</span><input class="inp" data-gh="user" value="${esc(c.user)}" autocapitalize="off" autocomplete="off" spellcheck="false"></label>
+      <label class="tf"><span>DATA REPOSITORY</span><input class="inp" data-gh="repo" value="${esc(c.repo)}" autocapitalize="off" autocomplete="off" spellcheck="false"></label>
+      <label class="tf"><span class="row">TOKEN<span class="sp"></span>${tipBtn('token')}</span><input class="inp" data-gh="token" type="password" value="${esc(c.token)}" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></label>
+    </div>
+    <div class="row" style="gap:8px;margin-top:20px">${on?`<button class="btn out" data-act="ghOff">Disconnect</button>`:''}<span class="sp"></span><button class="btn" data-act="ghSave">${ic('cloud',20)}${on?'Save':'Connect'}</button></div>`);
+  ghSetup.L=L;
+}
+async function ghConnect(){
+  const L=ghSetup.L,v=k=>$(`[data-gh=${k}]`,L.body).value.trim();
+  const next={...GH.cfg,user:v('user'),repo:v('repo'),token:v('token')};
+  if(!next.user||!next.repo||!next.token){snack('Fill in all three fields');return}
+  const prev=GH.cfg;GH.cfg=next;
+  let r;try{r=await GH.req('GET',GH.path(),{allow:[404]})}
+  catch(e){GH.cfg=prev;snack(e.message);return}
+  if(r.status===404){GH.cfg=prev;snack(GH.msg(404));return}
+  if(!r.data.private){GH.cfg=prev;snack('That repository is public. Use a private one.');return}
+  await Sync.saveCfg();closeLayer(L);Sync.lastError=null;renderCur();
+  snack('Connected to '+r.data.full_name);
+  Sync.run({reason:'manual'});
+}
+
+/* ---- details sheet: status, device, activity ---- */
+function syncSheet(){
+  const L=sheet(()=>{const v=syncView(),log=Sync.st.log.slice(0,15);
+    return `<div class="st">Sync</div>
+    <div class="group hi">
+      <div class="li"><span class="lead sync ${v.k}">${ic(syncIcon(v.k))}</span><span class="tx"><span class="t1">${esc(v.long)}</span><span class="t2">Last synced ${agoT(Sync.st.lastSyncAt)}</span></span><button class="btn tonal" data-act="syncNow" ${Sync.busy?'disabled':''}>Sync</button></div>
+    </div>
+    <h2 class="sh" style="margin-top:20px">Activity</h2>
+    ${log.length?`<div class="slog">${log.map(x=>`<div><time>${fmtD(x.at,{day:'numeric',month:'short'})} ${fmtT(x.at)}</time><span>${esc(x.text)}</span></div>`).join('')}</div>`:`<div class="empty">Nothing yet</div>`}`});
+  syncSheet.L=L;
+}
+async function devPick(){
+  if(!GH.ready())return;
+  let list;try{list=await Sync.devices()}catch(e){snack(e.message);return}
+  if(!list.length){snack('No other device has synced yet');return}
+  const L=sheet(()=>`<div class="st">Settings from another device</div><div class="group hi">${list.sort((a,b)=>(b.at||0)-(a.at||0)).map(r=>`<button class="li" data-act="devUse" data-id="${esc(r.id)}"><span class="lead sec">${ic(r.form==='tablet'?'tablet':'phone')}</span><span class="tx"><span class="t1">${esc(r.name||r.id)}</span><span class="t2">${esc(r.form||'')} · ${agoT(r.at)}</span></span><span class="tr">${ic('right')}</span></button>`).join('')}</div>`);
+  devPick.L=L;
+}
+async function devName(){
+  let n=Sync.st.name;
+  const p=dialog({title:'Device name',body:`<input class="inp" id="devNm" value="${esc(n)}" maxlength="30" autocomplete="off">`,actions:[{label:'Cancel',val:0},{label:'Save',val:1,cls:''}]});
+  const i=$('#devNm');if(i)i.oninput=()=>n=i.value;
+  if(!await p)return;
+  n=n.trim().slice(0,30);if(!n||n===Sync.st.name)return;
+  Sync.st.name=n;await Sync.saveState();Sync.touch();renderCur();
+}
+
 /* ================= lifecycle ================= */
 async function syncFromStore(){
   if(!S||dirty||S.active||Layers.length||Ov.open)return;
@@ -1853,9 +2353,12 @@ async function syncFromStore(){
   if(S.active){if(S.active.endAt)showSummary();else openSession()}
 }
 document.addEventListener('visibilitychange',()=>{
-  if(document.hidden){flush()}
-  else{if(S&&S.active&&Ov.open)Wake.on();if(S){const n=Date.now();if(S.active){E.advance(n)}if(memo.tk!==dk(new Date())&&!Ov.open)renderCur()}syncFromStore()}
+  if(document.hidden){flush();if(GH.ready()&&Sync.st){Sync.recount();if(Sync.waiting)Sync.run({reason:'hide',keepalive:true})}}
+  else{if(S&&S.active&&Ov.open)Wake.on();if(S){const n=Date.now();if(S.active){E.advance(n)}if(memo.tk!==dk(new Date())&&!Ov.open)renderCur()}syncFromStore();if(GH.ready()&&Sync.st&&Date.now()-Sync.st.lastPullAt>30000)Sync.run({reason:'auto'})}
 });
+addEventListener('online',()=>{if(GH.ready())Sync.run({reason:'auto'})});
+addEventListener('offline',()=>paintSync());
+setInterval(()=>{if(!document.hidden&&GH.ready()&&Sync.st&&GH.cfg.auto)Sync.run({reason:'auto'})},300000);
 addEventListener('pagehide',()=>flush());
 addEventListener('storage',e=>{if(e.key==='ember:rev')syncFromStore()});
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>S&&applyPrefs(S.settings));
@@ -1865,10 +2368,12 @@ setInterval(()=>{if(S&&memo.tk&&memo.tk!==dk(new Date())&&!Ov.open&&!Layers.leng
   try{myRev=localStorage.getItem('ember:rev')}catch(e){}
   let d=await DB.get('state');
   S=d?normalize(d):freshState();
+  await Sync.load(!d);
   if(!d)save();
   applyPrefs(S.settings);cachePrefs();
   renderNav();renderView('today',true);enter($('#v-today'));
   if(S.active){if(S.active.endAt)showSummary();else openSession()}
+  if(GH.ready())Sync.run({reason:'open'});
   try{if(navigator.storage&&navigator.storage.persisted){persisted=await navigator.storage.persisted();if(!persisted&&navigator.storage.persist)persisted=await navigator.storage.persist()}}catch(e){}
 })();
 </script>
